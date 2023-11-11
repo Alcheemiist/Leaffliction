@@ -3,8 +3,11 @@ from plantcv import plantcv as pcv
 import matplotlib.pyplot as plt
 
 import os
-import sys
+from skimage import data, filters
+import matplotlib.pyplot as plt
+import numpy as np
 
+import sys
 def nothing(x):
     # Load an image
     image = cv2.imread('../images/Apple_Black_rot/image (1).JPG')
@@ -31,36 +34,58 @@ def usage():
     print("Dir Usage: ./Transformation.[extension] -src Apple/apple_healthy/ -dst dst_directory")
     exit(1)
 
-
-def transform_image(image):
+def transform_image(img_path):
     #  image transformation 
     print("transforming image")
-
+    # LOAD IMAGE
+    image = cv2.imread(img_path)
+    # Convert the Image to RGB
+    rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    # Convert the Image to Grayscale
+    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    
     # PLOT CANVAS
-    plt.figure(figsize=(12, 12))
-    plt.subplot(2, 3, 1)
+    plt.figure(figsize=(9, 9))
 
-    # ORIGINAL IMAGE
-    plt.imshow(image)
-    plt.title('Original Image')
+    # [X] ORIGINAL IMAGE
+    plt.subplot(3, 4, 1), plt.imshow(image), plt.title('Original Image')
 
-    # GAUSSIAN BLUR 
-    # MASK
+    # [X] GRAYSCALE IMAGE
+    plt.subplot(3, 4, 2), plt.imshow(gray_image, cmap='gray'), plt.title('Gray Image')
+
+    # [X] GAUSSIAN BLUR
+    kernel_size = (5, 5)
+    GB_image = cv2.GaussianBlur(gray_image, kernel_size, 0)
+    plt.subplot(3, 4, 3), plt.imshow(GB_image), plt.title('Gaussian blur')
+    plt.subplot(3, 4, 4), plt.imshow(GB_image, cmap='gray'), plt.title('Gray Gaussian blur')
+
+    # [X] BINARY GAUSSIAN BLUR
+    threshold_value = filters.threshold_otsu(GB_image)
+    binary_image = GB_image > threshold_value
+    plt.subplot(3, 4, 5), plt.imshow(binary_image, cmap='binary'), plt.title('Binary Gaussian blur')
+
+    # [] MASK
+    threshold_value = filters.threshold_otsu(gray_image)
+    binary_mask = (gray_image > threshold_value).astype(np.uint8) * 255
+    masked_image = cv2.bitwise_and(image, image, mask=binary_mask)
+    plt.subplot(3, 4, 6), plt.imshow(masked_image[:, :, ::-1]), plt.title('Mask')
+
     # ROI OBJECTS
     # ANALYZE OBJECTS
     # PSEUDOLANDMARKS
+    
+    # // FACULTATIF
     # COLOR HISTOGRAM
-        # HISTOGRAM EQUALIZATION
-        # CLAHE
-        # ADAPTIVE THRESHOLD
-        # OTSU THRESHOLD
-        # BINARY THRESHOLD
-        # MASKING
+    # HISTOGRAM EQUALIZATION
+    # CLAHE
+    # ADAPTIVE THRESHOLD
+    # OTSU THRESHOLD
+    # BINARY THRESHOLD
+    # MASKING
 
     # DISPLAY
     plt.tight_layout()
     plt.show()
-
     pass
 
 def main():
@@ -73,8 +98,7 @@ def main():
     elif len(sys.argv) == 2:
         path = sys.argv[1]
         if os.path.isfile(path):
-            image = cv2.imread(path)
-            transformed_image = transform_image(image)
+            transformed_image = transform_image(path)
     elif len(sys.argv) == 6:
         print("dir")
             # 6 ARG  CASE : DIRECTORY
