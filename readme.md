@@ -27,3 +27,5 @@ is working well on small data sets.
 ### Commandes
 
     - pyinstaller --onefile Transformation.py
+
+    - python3 -m venv ./venv
