@@ -18,23 +18,6 @@ def nothing(x):
     # You can create a mask based on your specific requirements. Here's an example:
     mask = pcv.threshold.binary(grayscale_image, threshold=80)
 
-    # Region of Interest (ROI) Objects
-    # roi_objects, roi_hierarchy = pcv.find_objects(image=image, mask=mask)
-
-    # Analyze Objects
-    # analysis_results, img_out = pcv.analyze_objects(image=image, objects=roi_objects, mask=mask)
-
-    # Pseudolandmarks
-    # You can determine pseudolandmarks based on your analysis results. For example, centroid coordinates:
-    # pseudolandmarks = [(obj['centroid'][0], obj['centroid'][1]) for obj in analysis_results]
-
-    # Display the images and analysis results
-    plt.figure(figsize=(12, 12))
-
-    plt.subplot(2, 3, 1)
-    plt.imshow(image)
-    plt.title('Original Image')
-
     plt.subplot(2, 3, 2)
     plt.imshow(blurred_image)
     plt.title('Gaussian Blur')
@@ -43,33 +26,24 @@ def nothing(x):
     plt.imshow(mask, cmap='gray')
     plt.title('Mask')
 
-    # plt.subplot(2, 3, 4)
-    # pcv.plot_objects(image, roi_objects)
-    # plt.title('ROI Objects')
-
-    # plt.subplot(2, 3, 5)
-    # plt.imshow(img_out, cmap='gray')
-    # plt.title('Analyzed Objects')
-
-    # plt.subplot(2, 3, 6)
-    # plt.imshow(image)
-    # for landmark in pseudolandmarks:
-    #     plt.scatter(landmark[0], landmark[1], s=10, c='red')
-    # plt.title('Pseudolandmarks')
-
-    plt.tight_layout()
-    plt.show()
-
 def usage():
     print("Img Usage: python3 Transformation.py <path_to_image>")
     print("Dir Usage: ./Transformation.[extension] -src Apple/apple_healthy/ -dst dst_directory")
     exit(1)
 
 
-def transform_image(image_path):
-    #  image transformation code 
+def transform_image(image):
+    #  image transformation 
     print("transforming image")
+
+    # PLOT CANVAS
+    plt.figure(figsize=(12, 12))
+    plt.subplot(2, 3, 1)
+
     # ORIGINAL IMAGE
+    plt.imshow(image)
+    plt.title('Original Image')
+
     # GAUSSIAN BLUR 
     # MASK
     # ROI OBJECTS
@@ -82,6 +56,11 @@ def transform_image(image_path):
         # OTSU THRESHOLD
         # BINARY THRESHOLD
         # MASKING
+
+    # DISPLAY
+    plt.tight_layout()
+    plt.show()
+
     pass
 
 def main():
