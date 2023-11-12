@@ -1,12 +1,9 @@
-import cv2
 from plantcv import plantcv as pcv
 import matplotlib.pyplot as plt
-
-import os
 from skimage import data, filters
-import matplotlib.pyplot as plt
+import cv2
 import numpy as np
-
+import os
 import sys
 
 def usage():
