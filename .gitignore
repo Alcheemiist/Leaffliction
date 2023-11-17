@@ -1,6 +1,10 @@
+<<<<<<< HEAD
 .cosine
 venv 
 images
 dist
 build
 *.spec
+=======
+data/
+>>>>>>> d4881eec3809f8bdf1dea6ed41f476b393ba55c2
