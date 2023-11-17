@@ -2,8 +2,6 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
-import matplotlib.pyplot as plt
-import seaborn as sns
 import seaborn as sns
 import pathlib
 import sys
@@ -14,14 +12,18 @@ def count_images(directory):
     counts = {}
     for subdir in subdirs:
         subdir_path = os.path.join(directory, subdir)
-        image_files = [f for f in os.listdir(subdir_path) if Image.open(os.path.join(subdir_path, f)).format in ['JPEG', 'PNG']]
+        image_files = [
+                f for f in os.listdir(subdir_path)
+                if Image.open(os.path.join(subdir_path, f)).format
+                in ['JPEG', 'PNG']
+        ]
         counts[subdir] = len(image_files)
     return counts
+
 
 def plot_charts(counts, directory_name):
     labels = list(counts.keys())
     sizes = list(counts.values())
-
     # Pie chart
     plt.figure(figsize=[10, 10])
     cmap = plt.get_cmap("tab20c")
@@ -30,7 +32,6 @@ def plot_charts(counts, directory_name):
     plt.title(f'Pie chart for {directory_name}')
     plt.savefig(f'{directory_name}_pie_chart.png')
     plt.show()
-
     # Bar chart
     plt.figure(figsize=[10, 10])
     sns.barplot(y=labels, x=sizes, orient='h', palette='viridis')
@@ -40,7 +41,6 @@ def plot_charts(counts, directory_name):
     plt.grid(True)
     plt.savefig(f'{directory_name}_bar_chart.png')
     plt.show()
-
     # Histogram
     plt.figure(figsize=[10, 10])
     colors = plt.cm.viridis(np.linspace(0, 1, len(labels)))
@@ -52,7 +52,6 @@ def plot_charts(counts, directory_name):
     plt.show()
 
 
-
 if __name__ == '__main__':
     path = pathlib.Path('./data/images/')
 
@@ -60,4 +59,3 @@ if __name__ == '__main__':
     directory_name = os.path.basename(directory)
     counts = count_images(directory)
     plot_charts(counts, directory_name)
-    
