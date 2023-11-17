@@ -58,4 +58,5 @@ if __name__ == '__main__':
     directory = sys.argv[1]
     directory_name = os.path.basename(directory)
     counts = count_images(directory)
+    print(counts)
     plot_charts(counts, directory_name)
