@@ -5,11 +5,9 @@ import cv2
 import numpy as np
 import os
 import sys
-
-def usage():
-    print("Img Usage: python3 Transformation.py <path_to_image>")
-    print("Dir Usage: ./Transformation.[extension] -src Apple/apple_healthy/ -dst dst_directory")
-    exit(1)
+import argparse
+from PIL import Image
+from PIL import Image, UnidentifiedImageError
 
 def ft_Pseudolandmarks(image):
     # Convert the Image to HSV for better color analysis
@@ -34,6 +32,7 @@ def ft_Pseudolandmarks(image):
     for landmark in pseudolandmarks:
         cv2.circle(result_image, landmark, 5, (0, 255, 0), -1)
     plt.subplot(2, 6, 12), plt.imshow(result_image[:, :, ::-1]), plt.title('Pseudolandmarks')
+    return result_image
 
 def ft_analyze_objects(image):
     # Convert the Image to HSV for better color analysis
@@ -60,6 +59,7 @@ def ft_analyze_objects(image):
     # Overlay the Contours on the Original Image
     result_image = cv2.addWeighted(image, 1, contour_canvas, 1, 0)
     plt.subplot(2, 6, 11), plt.imshow(result_image[:, :, ::-1]), plt.title('Analyze Objects')
+    return result_image
 
 def ft_roi_objects(image):
         # Define the Color to Fill
@@ -74,6 +74,7 @@ def ft_roi_objects(image):
     result_image = image.copy()
     result_image[color_mask] = fill_color
     plt.subplot(2, 6, 10), plt.imshow(result_image[:, :, ::-1]), plt.title('Roi Objects')
+    return result_image
 
 def ft_color_mask(image):
     h_min = 70
@@ -93,6 +94,7 @@ def ft_color_mask(image):
         # Merge RGB Channels with Alpha Channel
     filtered_image = cv2.merge((image, alpha_channel))
     plt.subplot(2, 6, 9), plt.imshow(filtered_image), plt.title('Color Alpha Mask')
+    return filtered_image
 
 def ft_rgb_mask(image, grayscale_image):
     thresh = 122
@@ -100,77 +102,107 @@ def ft_rgb_mask(image, grayscale_image):
     refined_mask = cv2.erode(binary_mask, None, iterations=1)
     refined_mask = cv2.dilate(refined_mask, None, iterations=1)
     plt.subplot(2, 6, 7), plt.imshow(refined_mask), plt.title('Refined Mask')
+    return refined_mask
 
-def transform_image(img_path):
-    #  image transformation 
-    print("transforming image")
-    # LOAD IMAGE
-    image = cv2.imread(img_path)
-    # Convert the Image to RGB
-    rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    # Convert the Image to Grayscale
+def ft_gaussian_blur(image):
     grayscale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    # PLOT CANVAS
-    plt.figure(figsize=(12, 8))
-    # [X] ORIGINAL IMAGE
-    plt.subplot(2, 6, 1), plt.imshow(image), plt.title('Original Image')
-    # [X] GRAYSCALE IMAGE
-    plt.subplot(2, 6, 2), plt.imshow(grayscale_image, cmap='gray'), plt.title('Gray Image')
-    # [X] GAUSSIAN BLUR
     kernel_size = (5, 5)
     GB_image = cv2.GaussianBlur(grayscale_image, kernel_size, 0)
-    plt.subplot(2, 6, 3), plt.imshow(GB_image), plt.title('Gaussian blur')
-    plt.subplot(2, 6, 4), plt.imshow(GB_image, cmap='gray'), plt.title('Gray Gaussian blur')
-    # [X] BINARY GAUSSIAN BLUR
     threshold_value = filters.threshold_otsu(GB_image)
     binary_image = GB_image > threshold_value
-    plt.subplot(2, 6, 5), plt.imshow(binary_image, cmap='binary'), plt.title('Binary Gaussian blur')
-    ## MASKS
-    # [] HSV MASK
-    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    plt.subplot(2, 6, 6), plt.imshow(hsv_image), plt.title('HSV Mask')
-    # [] RGB MASK
-    ft_rgb_mask(image, grayscale_image)
-    # [] COLOR MASK
-    ft_color_mask(image)
-    # [] ROI OBJECTS
-    ft_roi_objects(image)
-    # ANALYZE OBJECTS
-    ft_analyze_objects(image)
-    # PSEUDOLANDMARKS
-    ft_Pseudolandmarks(image)
+    return binary_image.astype(np.uint8) * 255
 
-    plt.tight_layout()
-    plt.show()
+def process_single_image(img_path):
+    try:
+        #  image transformation 
+        print("transforming image")
+        # LOAD IMAGE
+        image = cv2.imread(img_path)
+        # Convert the Image to RGB
+        rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        # Convert the Image to Grayscale
+        grayscale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        # PLOT CANVAS
+        plt.figure(figsize=(12, 8))
+        # [X] ORIGINAL IMAGE
+        plt.subplot(2, 6, 1), plt.imshow(image), plt.title('Original Image')
+        # [X] GRAYSCALE IMAGE
+        plt.subplot(2, 6, 2), plt.imshow(grayscale_image, cmap='gray'), plt.title('Gray Image')
+        # [X] GAUSSIAN BLUR
+        kernel_size = (5, 5)
+        GB_image = cv2.GaussianBlur(grayscale_image, kernel_size, 0)
+        plt.subplot(2, 6, 3), plt.imshow(GB_image), plt.title('Gaussian blur')
+        plt.subplot(2, 6, 4), plt.imshow(GB_image, cmap='gray'), plt.title('Gray Gaussian blur')
+        # [X] BINARY GAUSSIAN BLUR
+        threshold_value = filters.threshold_otsu(GB_image)
+        binary_image = GB_image > threshold_value
+        plt.subplot(2, 6, 5), plt.imshow(binary_image, cmap='binary'), plt.title('Binary Gaussian blur')
+        ## MASKS
+        # [] HSV MASK
+        hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+        plt.subplot(2, 6, 6), plt.imshow(hsv_image), plt.title('HSV Mask')
+        # [] RGB MASK
+        ft_rgb_mask(image, grayscale_image)
+        # [] COLOR MASK
+        ft_color_mask(image)
+        # [] ROI OBJECTS
+        ft_roi_objects(image)
+        # ANALYZE OBJECTS
+        ft_analyze_objects(image)
+        # PSEUDOLANDMARKS
+        ft_Pseudolandmarks(image)
+
+        plt.tight_layout()
+        plt.show()
+    except UnidentifiedImageError:
+        print(f"Error: The file '{img_path}' is not a valid image.")
+    except IOError:
+        print(f"Error: Could not open the file '{img_path}'.")
+
+    
+def process_directory(src_dir, dst_dir, mask):
+    if not os.path.exists(dst_dir):
+        os.makedirs(dst_dir, exist_ok=True)
+        
+    transformations = {
+        'Pseudolandmarks': ft_Pseudolandmarks,
+        'AnalyzeObjects': ft_analyze_objects,
+        'RoiObjects': ft_roi_objects,
+        'ColorMask': ft_color_mask,
+        'RgbMask': ft_rgb_mask,
+        'GaussianBlur': ft_gaussian_blur,
+    }
+    
+    for filename in os.listdir(src_dir):
+        if filename.endswith('.JPG') or filename.endswith('.png'):
+            image_path = os.path.join(src_dir, filename)
+        try:
+            trans_func = transformations[mask]
+            image = cv2.imread(image_path)
+            transformed_imag = trans_func(image)
+            save_path = os.path.join(dst_dir, f"{mask}_{filename}")
+            cv2.imwrite(save_path, transformed_imag)
+        except Exception as e:
+            print(f"Error processing {image_path}: {e}")
 
 def main():
-    # NO ARGUMENTS
-    if len(sys.argv) < 2:
-        print("Img Usage: python3 Transformation.py <path_to_image>")
-        print("Dir Usage: ./Transformation.[extension] -src Apple/apple_healthy/ -dst dst_directory")
-        exit(1)
-    # 1 ARG, CASE : IMAGE 
-    elif len(sys.argv) == 2:
-        path = sys.argv[1]
-        if os.path.isfile(path):
-            transformed_image = transform_image(path)
-    elif len(sys.argv) == 6:
-        print("dir")
-            # 6 ARG  CASE : DIRECTORY
-            # (arg[1] == -src, arg[3] == -dst, arg[5] == TRANSFO TYPE)
-            # check directory exists
-            # elif os.path.isdir(path):
-            #     for filename in os.listdir(path):
-            #         if filename.endswith(".jpg") or filename.endswith(".png"):
-            #             image = Image.open(os.path.join(path, filename))
-            #             transformed_image = transform_image(image)
-            #             transformed_image.save(os.path.join('destination_directory', filename))
+    parser = argparse.ArgumentParser(description='Apply image transformations.')
+    parser.add_argument('-src', '--source', nargs='?', help='Source image or directory')
+    parser.add_argument('-dst', '--destination', help='Destination directory', default='.')
+    parser.add_argument('-mask', '--mask', help='Apply mask')
+    args = parser.parse_args()
+    print(len(sys.argv))
 
-        pass
-    elif len(sys.argv) > 6:
-        print("dir")
-        usage()
-
+    if len(sys.argv) == 2:
+        process_single_image(sys.argv[1])
+    elif len(sys.argv) > 2 and os.path.isdir(args.source):
+        process_directory(args.source, args.destination, args.mask)
+    else:
+        parser.print_help()
 
 if __name__ == "__main__":
     main()
+
+
+
+
