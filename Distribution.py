@@ -8,7 +8,8 @@ import sys
 
 
 def count_images(directory):
-    subdirs = [subdir for subdir in os.listdir(directory) if os.path.isdir(os.path.join(directory, subdir))]
+    subdirs = [subdir for subdir in os.listdir(directory) if os.path.isdir(
+        os.path.join(directory, subdir))]
     counts = {}
     for subdir in subdirs:
         subdir_path = os.path.join(directory, subdir)

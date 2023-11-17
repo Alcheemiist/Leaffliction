@@ -3,7 +3,6 @@ from PIL import Image
 from pathlib import Path
 import os
 import sys
-import random
 
 
 def augment_and_save(image_path):
