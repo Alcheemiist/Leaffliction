@@ -1,13 +1,12 @@
 from plantcv import plantcv as pcv
 import matplotlib.pyplot as plt
-from skimage import data, filters
+from skimage import filters
 import cv2
 import numpy as np
 import os
 import sys
 import argparse
-from PIL import Image
-from PIL import Image, UnidentifiedImageError
+from PIL import UnidentifiedImageError
 from sklearn.cluster import KMeans
 import webcolors as wc
 
@@ -146,8 +145,6 @@ def process_single_image(img_path):
         print("transforming image")
         # LOAD IMAGE
         image = cv2.imread(img_path)
-        # Convert the Image to RGB
-        rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         # Convert the Image to Grayscale
         grayscale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         # PLOT CANVAS
@@ -186,8 +183,7 @@ def process_single_image(img_path):
         print(f"Error: The file '{img_path}' is not a valid image.")
     except IOError:
         print(f"Error: Could not open the file '{img_path}'.")
-
-    
+  
 def process_directory(src_dir, dst_dir, mask):
     if not os.path.exists(dst_dir):
         os.makedirs(dst_dir, exist_ok=True)
@@ -245,12 +241,6 @@ def ft_color_histogram(image_path):
     # Define the color ranges for blue, rose, and yellow in RGB color space
     image = cv2.imread(image_path)
     colors = extract_colors(image, 10)
-    color_dict = {}
-
-    for color in colors:
-        print(color)
-        color_name = wc.rgb_to_name((color[0] / 255, color[1] / 255, color[2]/255))
-        color_dict[color_name] = color
 
     plt.figure(figsize=(15, 8))
     for color in colors:
@@ -265,17 +255,21 @@ def ft_color_histogram(image_path):
         hist /= hist.sum()  # Normalize the histogram
         
         # Plot the histogram
-        plt.plot(hist, label=color_dict[color])
+        num0, num1, num2 = color
+        try: 
+            label = wc.rgb_to_name((num0,num1,num2))
+        except Exception as e:
+            label = str(color)
+        plt.plot(hist, label=label)
 
     plt.xlim([0,256])
     plt.ylim([0,0.15])
     plt.title('Color Histogram')
     plt.xlabel('Pixel Intensity')
-    plt.ylabel('Proportion of Pixels')
+    plt.ylabel('Proportion of Pixels (%)')
     plt.legend()
     plt.tight_layout()
     plt.show()
-
 
 def main():
     parser = argparse.ArgumentParser(description='Apply image transformations.')
@@ -283,7 +277,7 @@ def main():
     parser.add_argument('-dst', '--destination', help='Destination directory', default='.')
     parser.add_argument('-mask', '--mask', help='Apply mask')
     args = parser.parse_args()
-    print(len(sys.argv))
+    # print(len(sys.argv))
 
     if len(sys.argv) == 2:
         process_single_image(sys.argv[1])
