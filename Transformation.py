@@ -1,4 +1,3 @@
-from plantcv import plantcv as pcv
 import matplotlib.pyplot as plt
 from skimage import filters
 import cv2
@@ -10,6 +9,7 @@ from PIL import UnidentifiedImageError
 from sklearn.cluster import KMeans
 import webcolors as wc
 
+
 def ft_Pseudolandmarks(image):
     # Convert the Image to HSV for better color analysis
     hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
@@ -19,7 +19,8 @@ def ft_Pseudolandmarks(image):
     # Create a Mask Based on the Color Range
     color_mask = cv2.inRange(hsv_image, lower_color, upper_color)
     # Find Contours of Objects in the Mask
-    contours, _ = cv2.findContours(color_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(
+        color_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     pseudolandmarks = []
     for contour in contours:
         # Calculate the bounding box of the object
@@ -32,8 +33,10 @@ def ft_Pseudolandmarks(image):
     result_image = image.copy()
     for landmark in pseudolandmarks:
         cv2.circle(result_image, landmark, 5, (0, 255, 0), -1)
-    plt.subplot(2, 6, 12), plt.imshow(result_image[:, :, ::-1]), plt.title('Pseudolandmarks')
+    plt.subplot(2, 6, 12), plt.imshow(result_image[:, :, ::-1])
+    plt.title('Pseudolandmarks')
     return result_image
+
 
 def ft_analyze_objects(image):
     # Convert the Image to HSV for better color analysis
@@ -44,34 +47,46 @@ def ft_analyze_objects(image):
     # Create a Mask Based on the Color Range
     color_mask = cv2.inRange(hsv_image, lower_color, upper_color)
     # Find Contours of Objects in the Mask
-    contours, _ = cv2.findContours(color_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(
+        color_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     # Draw Contours on a Blank Canvas
     contour_canvas = np.zeros_like(image, dtype=np.uint8)
     cv2.drawContours(contour_canvas, contours, -1, (0, 255, 0), 2)
     # Draw Lines Inside the Detected Objects
     line_color = (0, 0, 255)
-    line_thickness = 2
+    L_thinkness = 2
     for contour in contours:
         # Convert the contour to a numpy array
         contour_array = contour.reshape((-1, 2))
         for i in range(len(contour_array) - 1):
-            cv2.line(contour_canvas, tuple(contour_array[i]), tuple(contour_array[i + 1]), line_color, line_thickness)
-        cv2.line(contour_canvas, tuple(contour_array[-1]), tuple(contour_array[0]), line_color, line_thickness)
+            c0 = contour_array[i]
+            c1 = contour_array[i + 1]
+            cv2.line(
+                contour_canvas, tuple(c0), tuple(c1), line_color, L_thinkness
+            )
+        c0 = contour_array[-1]
+        c1 = contour_array[0]
+        cv2.line(
+            contour_canvas, tuple(c0), tuple(c1), line_color, L_thinkness
+        )
     # Overlay the Contours on the Original Image
     result_image = cv2.addWeighted(image, 1, contour_canvas, 1, 0)
-    plt.subplot(2, 6, 11), plt.imshow(result_image[:, :, ::-1]), plt.title('Analyze Objects')
+    plt.subplot(2, 6, 11), plt.imshow(result_image[:, :, ::-1])
+    plt.title('Analyze Objects')
     return result_image
 
+
 def ft_roi_objects(image):
-    original_image = image.copy()
-        # Define the Color to Fill
+    # Define the Color to Fill
     target_color = [100, 90, 50]
-        # Define a Color Similarity Threshold
+    # Define a Color Similarity Threshold
     color_similarity_threshold = 50  # Adjust as needed
-        # Create a Mask Based on Color Similarity
+    # Create a Mask Based on Color Similarity
     color_difference = np.abs(image - target_color)
-    color_mask = np.all(color_difference <= color_similarity_threshold, axis=-1)
-        # Define the Fill Color
+    color_mask = np.all(
+        color_difference <= color_similarity_threshold, axis=-1
+    )
+    # Define the Fill Color
     fill_color = [0, 255, 0]
     result_image = image.copy()
     result_image[color_mask] = fill_color
@@ -84,7 +99,9 @@ def ft_roi_objects(image):
     color_difference = np.abs(image - target_color)
     color_mask = np.all(color_difference < color_similarity_threshold, axis=-1)
     # Find contours in the mask
-    contours, _ = cv2.findContours(color_mask.astype('uint8'), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(
+        color_mask.astype('uint8'), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+    )
     # Initialize min and max coordinates
     min_x, min_y, max_x, max_y = None, None, None, None
     # Find min and max coordinates from all contours
@@ -99,9 +116,13 @@ def ft_roi_objects(image):
         if max_y is None or y + h > max_y:
             max_y = y + h
     # Draw a single rectangle that contains all objects
-    cv2.rectangle(result_image, (min_x, min_y), (max_x, max_y), (255,0,0), 10)
-    plt.subplot(2, 6 ,10), plt.imshow(result_image[:, :, ::-1]), plt.title('Roi Objects')
+    cv2.rectangle(
+        result_image, (min_x, min_y), (max_x, max_y), (255, 0, 0), 10
+    )
+    plt.subplot(2, 6, 10), plt.imshow(result_image[:, :, ::-1])
+    plt.title('Roi Objects')
     return result_image
+
 
 def ft_color_mask(image):
     h_min = 70
@@ -115,21 +136,26 @@ def ft_color_mask(image):
     color_mask = cv2.inRange(image, lower_bound, upper_bound)
     result = cv2.bitwise_and(image, image, mask=~color_mask)
     plt.subplot(2, 6, 8), plt.imshow(result), plt.title('Color Mask')
-    # [] COLOR ALPHA MASK
-        # Invert the Mask to Create an Alpha Channel
+    # [] COLOR ALPHA MASK
+    # Invert the Mask to Create an Alpha Channel
     alpha_channel = 255 - color_mask
-        # Merge RGB Channels with Alpha Channel
+    # Merge RGB Channels with Alpha Channel
     filtered_image = cv2.merge((image, alpha_channel))
-    plt.subplot(2, 6, 9), plt.imshow(filtered_image), plt.title('Color Alpha Mask')
+    plt.subplot(2, 6, 9), plt.imshow(filtered_image)
+    plt.title('Color Alpha Mask')
     return filtered_image
+
 
 def ft_rgb_mask(image, grayscale_image):
     thresh = 122
-    _, binary_mask = cv2.threshold(grayscale_image, thresh, 255, cv2.THRESH_BINARY)
+    _, binary_mask = cv2.threshold(
+        grayscale_image, thresh, 255, cv2.THRESH_BINARY
+    )
     refined_mask = cv2.erode(binary_mask, None, iterations=1)
     refined_mask = cv2.dilate(refined_mask, None, iterations=1)
     plt.subplot(2, 6, 7), plt.imshow(refined_mask), plt.title('Refined Mask')
     return refined_mask
+
 
 def ft_gaussian_blur(image):
     grayscale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -139,42 +165,38 @@ def ft_gaussian_blur(image):
     binary_image = GB_image > threshold_value
     return binary_image.astype(np.uint8) * 255
 
+
 def process_single_image(img_path):
     try:
-        #  image transformation 
+        # image transformation
         print("transforming image")
-        # LOAD IMAGE
+        # LOAD IMAGE
         image = cv2.imread(img_path)
         # Convert the Image to Grayscale
         grayscale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        # PLOT CANVAS
+        # PLOT CANVAS
         plt.figure(figsize=(12, 8))
-        # [X] ORIGINAL IMAGE
+        # ORIGINAL IMAGE
         plt.subplot(2, 6, 1), plt.imshow(image), plt.title('Original Image')
-        # [X] GRAYSCALE IMAGE
-        plt.subplot(2, 6, 2), plt.imshow(grayscale_image, cmap='gray'), plt.title('Gray Image')
-        # [X] GAUSSIAN BLUR
+        # GRAYSCALE IMAGE
+        plt.subplot(2, 6, 2), plt.imshow(grayscale_image, cmap='gray')
+        plt.title('Gray Image')
+        # GAUSSIAN BLUR
         kernel_size = (5, 5)
         GB_image = cv2.GaussianBlur(grayscale_image, kernel_size, 0)
         plt.subplot(2, 6, 3), plt.imshow(GB_image), plt.title('Gaussian blur')
-        plt.subplot(2, 6, 4), plt.imshow(GB_image, cmap='gray'), plt.title('Gray Gaussian blur')
-        # [X] BINARY GAUSSIAN BLUR
+        plt.subplot(2, 6, 4), plt.imshow(GB_image, cmap='gray')
+        plt.title('Gray Gaussian blur')
         threshold_value = filters.threshold_otsu(GB_image)
         binary_image = GB_image > threshold_value
-        plt.subplot(2, 6, 5), plt.imshow(binary_image, cmap='binary'), plt.title('Binary Gaussian blur')
-        ## MASKS
-        # [] HSV MASK
+        plt.subplot(2, 6, 5), plt.imshow(binary_image, cmap='binary')
+        plt.title('Binary Gaussian blur')
         hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         plt.subplot(2, 6, 6), plt.imshow(hsv_image), plt.title('HSV Mask')
-        # [] RGB MASK
         ft_rgb_mask(image, grayscale_image)
-        # [] COLOR MASK
         ft_color_mask(image)
-        # [] ROI OBJECTS
         ft_roi_objects(image)
-        # ANALYZE OBJECTS
         ft_analyze_objects(image)
-        # PSEUDOLANDMARKS
         ft_Pseudolandmarks(image)
 
         plt.tight_layout()
@@ -183,11 +205,11 @@ def process_single_image(img_path):
         print(f"Error: The file '{img_path}' is not a valid image.")
     except IOError:
         print(f"Error: Could not open the file '{img_path}'.")
-  
+
+
 def process_directory(src_dir, dst_dir, mask):
     if not os.path.exists(dst_dir):
         os.makedirs(dst_dir, exist_ok=True)
-        
     transformations = {
         'Pseudolandmarks': ft_Pseudolandmarks,
         'AnalyzeObjects': ft_analyze_objects,
@@ -196,7 +218,6 @@ def process_directory(src_dir, dst_dir, mask):
         'RgbMask': ft_rgb_mask,
         'GaussianBlur': ft_gaussian_blur,
     }
-    
     for filename in os.listdir(src_dir):
         if filename.endswith('.JPG') or filename.endswith('.png'):
             image_path = os.path.join(src_dir, filename)
@@ -208,6 +229,7 @@ def process_directory(src_dir, dst_dir, mask):
             cv2.imwrite(save_path, transformed_imag)
         except Exception as e:
             print(f"Error processing {image_path}: {e}")
+
 
 def extract_colors(image, num_colors):
     # Reshape the image to be a list of RGB values
@@ -230,12 +252,16 @@ def extract_colors(image, num_colors):
 
     return color_counts
 
+
 def extract_top_colors(image, num_colors):
     # Extract the colors from the image
     color_counts = extract_colors(image, num_colors)
     # Sort the colors by count in descending order and select the top 5
-    top_colors = sorted(color_counts.items(), key=lambda item: item[1], reverse=True)[:5]
+    top_colors = sorted(
+        color_counts.items(), key=lambda item: item[1], reverse=True
+    )[:5]
     return top_colors
+
 
 def ft_color_histogram(image_path):
     # Define the color ranges for blue, rose, and yellow in RGB color space
@@ -245,25 +271,29 @@ def ft_color_histogram(image_path):
     plt.figure(figsize=(15, 8))
     for color in colors:
         # Create a mask for the current color
-        lower = np.array([max(color[0] - 10, 0), max(color[1] - 10, 0), max(color[2] - 10, 0)], dtype=np.uint8)
-        upper = np.array([min(color[0] + 10, 255), min(color[1] + 10, 255), min(color[2] + 10, 255)], dtype=np.uint8)
+        l0 = max(color[0] - 10, 0)
+        l1 = max(color[1] - 10, 0)
+        l2 = max(color[2] - 10, 0)
+        lower = np.array([l0, l1, l2], dtype=np.uint8)
+        c0 = min(color[0] + 10, 255)
+        c1 = min(color[1] + 10, 255)
+        c2 = min(color[2] + 10, 255)
+        upper = np.array([c0, c1, c2], dtype=np.uint8)
         mask = cv2.inRange(image, lower, upper)
-
         # Calculate the histogram for the masked image
-        hist = cv2.calcHist([image], [0], mask, [256], [0,256])
+        hist = cv2.calcHist([image], [0], mask, [256], [0, 256])
         hist = hist.astype(float)  # Convert the histogram to float
         hist /= hist.sum()  # Normalize the histogram
-        
         # Plot the histogram
         num0, num1, num2 = color
-        try: 
-            label = wc.rgb_to_name((num0,num1,num2))
-        except Exception as e:
+        try:
+            label = wc.rgb_to_name((num0, num1, num2))
+        except Exception:
             label = str(color)
         plt.plot(hist, label=label)
 
-    plt.xlim([0,256])
-    plt.ylim([0,0.15])
+    plt.xlim([0, 256])
+    plt.ylim([0, 0.15])
     plt.title('Color Histogram')
     plt.xlabel('Pixel Intensity')
     plt.ylabel('Proportion of Pixels (%)')
@@ -271,10 +301,15 @@ def ft_color_histogram(image_path):
     plt.tight_layout()
     plt.show()
 
+
 def main():
-    parser = argparse.ArgumentParser(description='Apply image transformations.')
+    parser = argparse.ArgumentParser(
+        description='Apply image transformations.'
+    )
     parser.add_argument('src', nargs='?', help='Source image or directory')
-    parser.add_argument('-dst', '--destination', help='Destination directory', default='.')
+    parser.add_argument(
+        '-dst', '--destination', help='Destination directory', default='.'
+    )
     parser.add_argument('-mask', '--mask', help='Apply mask')
     args = parser.parse_args()
     # print(len(sys.argv))
@@ -287,9 +322,6 @@ def main():
     else:
         parser.print_help()
 
+
 if __name__ == "__main__":
     main()
-
-
-
-
