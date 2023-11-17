@@ -1,0 +1,6 @@
+.cosine
+venv 
+images
+dist
+build
+*.spec
