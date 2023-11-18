@@ -2,7 +2,7 @@ from torchvision import transforms
 from PIL import Image
 from pathlib import Path
 import os
-import sys
+from balance import balanced
 
 
 def augment_and_save(image_path):
@@ -35,5 +35,7 @@ def augment_and_save(image_path):
 
 
 if __name__ == "__main__":
-    image_path = sys.argv[1]
-    augment_and_save(image_path)
+    # image_path = sys.argv[1]
+    # image_path = "./data/images/Apple_Black_rot/image\ \(1\).JPG"
+    # augment_and_save(image_path)
+    balanced()

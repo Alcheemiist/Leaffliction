@@ -44,7 +44,7 @@ def balance_dataset(base_dir, target_count, augmentations):
     """Balance the dataset by augmenting images."""
     for category in os.listdir(base_dir):
         category_dir = os.path.join(base_dir, category)
-        output_dir = Path(category_dir) / 'augmented_directory'
+        output_dir = Path(category_dir) / 'new_images'
         os.makedirs(output_dir, exist_ok=True)
         images = list(load_images_from_folder_and_subfolders(category_dir))
 
@@ -75,15 +75,22 @@ augmentations = {
 }
 
 
-if __name__ == "__main__":
-    base_dir = './data/images_copy/'
-    target_count = 1640  # The target count for each category
-    balance_dataset(base_dir, target_count, augmentations)
-    parent_dir = './data/images_copy/'
+def balanced():
+    source = './data/images/'
+    destination = './data/augmented_directory/'
+    try:
+        shutil.copytree(source, destination, dirs_exist_ok=True)
+    except shutil.Error as e:
+        print('Directory not copied. Error: %s' % e)
+    except OSError as e:
+        print('Directory not copied. Error: %s' % e)
 
-    for root, dirs, files in os.walk(parent_dir):
-        if 'augmented_directory' in dirs:
-            augmented_path = os.path.join(root, 'augmented_directory')
+    target_count = 1640
+    balance_dataset(destination, target_count, augmentations)
+
+    for root, dirs, files in os.walk(destination):
+        if 'new_images' in dirs:
+            augmented_path = os.path.join(root, 'new_images')
             for file in os.listdir(augmented_path):
                 file_path = os.path.join(augmented_path, file)
                 shutil.move(file_path, root)

@@ -143,7 +143,7 @@ def ft_color_mask(image):
     filtered_image = cv2.merge((image, alpha_channel))
     plt.subplot(2, 6, 9), plt.imshow(filtered_image)
     plt.title('Color Alpha Mask')
-    return filtered_image
+    return cv2.merge((image, alpha_channel))
 
 
 def ft_rgb_mask(image, grayscale_image):
@@ -215,7 +215,6 @@ def process_directory(src_dir, dst_dir, mask):
         'AnalyzeObjects': ft_analyze_objects,
         'RoiObjects': ft_roi_objects,
         'ColorMask': ft_color_mask,
-        'RgbMask': ft_rgb_mask,
         'GaussianBlur': ft_gaussian_blur,
     }
     for filename in os.listdir(src_dir):
@@ -303,24 +302,29 @@ def ft_color_histogram(image_path):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description='Apply image transformations.'
-    )
-    parser.add_argument('src', nargs='?', help='Source image or directory')
-    parser.add_argument(
-        '-dst', '--destination', help='Destination directory', default='.'
-    )
-    parser.add_argument('-mask', '--mask', help='Apply mask')
-    args = parser.parse_args()
-    # print(len(sys.argv))
 
-    if len(sys.argv) == 2:
-        process_single_image(sys.argv[1])
-        ft_color_histogram(sys.argv[1])
-    elif len(sys.argv) > 2 and os.path.isdir(args.source):
-        process_directory(args.source, args.destination, args.mask)
-    else:
-        parser.print_help()
+    # if len(sys.argv) == 2:
+    #     process_single_image(sys.argv[1])
+    #     ft_color_histogram(sys.argv[1])
+
+    # elif len(sys.argv) > 2:
+    #     parser = argparse.ArgumentParser(
+    #         description='Apply image transformations.')
+    #     parser.add_argument(
+    #         '-src', help='Source image or directory')
+    #     parser.add_argument(
+    #         '-dst', '--destination', help='Destination directory', default='.'
+    #     )
+    #     parser.add_argument('-mask', '--mask', help='Apply mask')
+    #     args = parser.parse_args()
+    #     process_directory(args.src, args.destination, args.mask)
+    # else:
+    #     parser.print_help()
+    img_path = "cc.JPG"
+    image = cv2.imread(img_path)
+    filtered_image = ft_color_mask(image)
+    plt.imshow(filtered_image)
+    plt.show()
 
 
 if __name__ == "__main__":
