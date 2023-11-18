@@ -123,7 +123,6 @@ def ft_roi_objects(image):
     plt.title('Roi Objects')
     return result_image
 
-
 def ft_color_mask(image):
     h_min = 70
     h_max = 255
@@ -136,18 +135,34 @@ def ft_color_mask(image):
     color_mask = cv2.inRange(image, lower_bound, upper_bound)
     result = cv2.bitwise_and(image, image, mask=~color_mask)
     plt.subplot(2, 6, 8), plt.imshow(result), plt.title('Color Mask')
+
+    return result
+
+def ft_color_alpha_mask(image):
     # [] COLOR ALPHA MASK
     # Invert the Mask to Create an Alpha Channel
-    alpha_channel = 255 - color_mask
     # Merge RGB Channels with Alpha Channel
+    h_min = 70
+    h_max = 255
+    s_min = 70
+    s_max = 255
+    v_min = 70
+    v_max = 255
+    lower_bound = np.array([h_min, s_min, v_min], dtype=np.uint8)
+    upper_bound = np.array([h_max, s_max, v_max], dtype=np.uint8)
+    color_mask = cv2.inRange(image, lower_bound, upper_bound)
+    alpha_channel = 255 - color_mask
     filtered_image = cv2.merge((image, alpha_channel))
     plt.subplot(2, 6, 9), plt.imshow(filtered_image)
     plt.title('Color Alpha Mask')
-    return cv2.merge((image, alpha_channel))
+    # Save the filtered image to a file
+    # cv2.imwrite('./log/filtered_image.jpg', filtered_image)
+    return filtered_image
 
 
-def ft_rgb_mask(image, grayscale_image):
+def ft_rgb_mask(image):
     thresh = 122
+    grayscale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     _, binary_mask = cv2.threshold(
         grayscale_image, thresh, 255, cv2.THRESH_BINARY
     )
@@ -165,40 +180,57 @@ def ft_gaussian_blur(image):
     binary_image = GB_image > threshold_value
     return binary_image.astype(np.uint8) * 255
 
+def ft_hsv_mask(image):
+    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    plt.subplot(2, 6, 6), plt.imshow(hsv_image), plt.title('HSV Mask')
+    return hsv_image    
+
+def ft_binary_gaussian_blur(image):
+    grayscale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    kernel_size = (5, 5)
+    GB_image = cv2.GaussianBlur(grayscale_image, kernel_size, 0)
+    threshold_value = filters.threshold_otsu(GB_image)
+    binary_image = GB_image > threshold_value
+    plt.subplot(2, 6, 5), plt.imshow(binary_image, cmap='binary')
+    plt.title('Binary Gaussian blur')
+
+def ft_real_gaussian_blur(image):
+    kernel_size = (5, 5)
+    grayscale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    GB_image = cv2.GaussianBlur(grayscale_image, kernel_size, 0)
+    plt.subplot(2, 6, 3), plt.imshow(GB_image), plt.title('Gaussian blur')
+
+def ft_gray_gaussian_blur(image):
+    kernel_size = (5, 5)
+    grayscale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    GB_image = cv2.GaussianBlur(grayscale_image, kernel_size, 0)
+    plt.subplot(2, 6, 4), plt.imshow(GB_image, cmap='gray')
+    plt.title('Gray Gaussian blur')
+
+def ft_gray(image):
+    grayscale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    plt.subplot(2, 6, 2), plt.imshow(grayscale_image, cmap='gray')
+    plt.title('Gray Image')
 
 def process_single_image(img_path):
     try:
-        # image transformation
-        print("transforming image")
-        # LOAD IMAGE
+        # SETUP IMAGE & PLOT
         image = cv2.imread(img_path)
-        # Convert the Image to Grayscale
-        grayscale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        # PLOT CANVAS
         plt.figure(figsize=(12, 8))
-        # ORIGINAL IMAGE
         plt.subplot(2, 6, 1), plt.imshow(image), plt.title('Original Image')
-        # GRAYSCALE IMAGE
-        plt.subplot(2, 6, 2), plt.imshow(grayscale_image, cmap='gray')
-        plt.title('Gray Image')
-        # GAUSSIAN BLUR
-        kernel_size = (5, 5)
-        GB_image = cv2.GaussianBlur(grayscale_image, kernel_size, 0)
-        plt.subplot(2, 6, 3), plt.imshow(GB_image), plt.title('Gaussian blur')
-        plt.subplot(2, 6, 4), plt.imshow(GB_image, cmap='gray')
-        plt.title('Gray Gaussian blur')
-        threshold_value = filters.threshold_otsu(GB_image)
-        binary_image = GB_image > threshold_value
-        plt.subplot(2, 6, 5), plt.imshow(binary_image, cmap='binary')
-        plt.title('Binary Gaussian blur')
-        hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-        plt.subplot(2, 6, 6), plt.imshow(hsv_image), plt.title('HSV Mask')
-        ft_rgb_mask(image, grayscale_image)
+
+        ft_gray(image)
+        ft_real_gaussian_blur(image)
+        ft_gray_gaussian_blur(image)
+        ft_binary_gaussian_blur(image)
+        ft_hsv_mask(image)
+        ft_rgb_mask(image)  
         ft_color_mask(image)
+        ft_color_alpha_mask(image)
         ft_roi_objects(image)
         ft_analyze_objects(image)
         ft_Pseudolandmarks(image)
-
+        # DISPLAY PLOT
         plt.tight_layout()
         plt.show()
     except UnidentifiedImageError:
@@ -303,29 +335,29 @@ def ft_color_histogram(image_path):
 
 def main():
 
-    # if len(sys.argv) == 2:
-    #     process_single_image(sys.argv[1])
-    #     ft_color_histogram(sys.argv[1])
+    if len(sys.argv) == 2:
+        process_single_image(sys.argv[1])
+        ft_color_histogram(sys.argv[1])
 
-    # elif len(sys.argv) > 2:
-    #     parser = argparse.ArgumentParser(
-    #         description='Apply image transformations.')
-    #     parser.add_argument(
-    #         '-src', help='Source image or directory')
-    #     parser.add_argument(
-    #         '-dst', '--destination', help='Destination directory', default='.'
-    #     )
-    #     parser.add_argument('-mask', '--mask', help='Apply mask')
-    #     args = parser.parse_args()
-    #     process_directory(args.src, args.destination, args.mask)
-    # else:
-    #     parser.print_help()
-    img_path = "cc.JPG"
-    image = cv2.imread(img_path)
-    filtered_image = ft_color_mask(image)
-    plt.imshow(filtered_image)
-    plt.show()
-
+    elif len(sys.argv) > 2:
+        parser = argparse.ArgumentParser(
+            description='Apply image transformations.')
+        parser.add_argument(
+            '-src', help='Source image or directory')
+        parser.add_argument(
+            '-dst', '--destination', help='Destination directory', default='.'
+        )
+        parser.add_argument('-mask', '--mask', help='Apply mask')
+        args = parser.parse_args()
+        process_directory(args.src, args.destination, args.mask)
+    else:
+        # parser.print_help()
+        print("Error: Invalid arguments.")
+    # img_path = "./images/Apple_Black_rot/image (1).JPG"
+    # image = cv2.imread(img_path)
+    # filtered_image = ft_color_mask(image)
+    # plt.imshow(filtered_image)
+    # plt.show()
 
 if __name__ == "__main__":
     main()
