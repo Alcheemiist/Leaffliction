@@ -2,12 +2,13 @@ from torchvision import transforms
 from PIL import Image
 from pathlib import Path
 import os
+import sys
 from balance import balanced
 
 
-def augment_and_save(image_path):
+def augment_and_save(image_path, dst_path):
     img_path = Path(image_path)
-    output_dir = img_path.parent / 'augmented_directory'
+    output_dir = dst_path / 'augmented_image'
     os.makedirs(output_dir, exist_ok=True)
     image = Image.open(image_path)
     filename = img_path.stem
@@ -35,7 +36,17 @@ def augment_and_save(image_path):
 
 
 if __name__ == "__main__":
-    # image_path = sys.argv[1]
-    # image_path = "./data/images/Apple_Black_rot/image\ \(1\).JPG"
-    # augment_and_save(image_path)
+
+    if len(sys.argv) < 2:
+        print("Usage: python Augmentation.py <image_path>")
+        exit(0)
+
+    image_path = sys.argv[1]
+    dst_path = Path('.')
+
+    if not os.path.exists(image_path) or not os.path.isfile(image_path):
+        print("Invalid or Image path does not exist")
+        exit(0)
+
+    augment_and_save(image_path, dst_path)
     balanced()
