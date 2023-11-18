@@ -123,6 +123,7 @@ def ft_roi_objects(image):
     plt.title('Roi Objects')
     return result_image
 
+
 def ft_color_mask(image):
     h_min = 70
     h_max = 255
@@ -137,6 +138,7 @@ def ft_color_mask(image):
     plt.subplot(2, 6, 8), plt.imshow(result), plt.title('Color Mask')
 
     return result
+
 
 def ft_color_alpha_mask(image):
     # [] COLOR ALPHA MASK
@@ -180,10 +182,12 @@ def ft_gaussian_blur(image):
     binary_image = GB_image > threshold_value
     return binary_image.astype(np.uint8) * 255
 
+
 def ft_hsv_mask(image):
     hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     plt.subplot(2, 6, 6), plt.imshow(hsv_image), plt.title('HSV Mask')
-    return hsv_image    
+    return hsv_image
+
 
 def ft_binary_gaussian_blur(image):
     grayscale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -194,11 +198,13 @@ def ft_binary_gaussian_blur(image):
     plt.subplot(2, 6, 5), plt.imshow(binary_image, cmap='binary')
     plt.title('Binary Gaussian blur')
 
+
 def ft_real_gaussian_blur(image):
     kernel_size = (5, 5)
     grayscale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     GB_image = cv2.GaussianBlur(grayscale_image, kernel_size, 0)
     plt.subplot(2, 6, 3), plt.imshow(GB_image), plt.title('Gaussian blur')
+
 
 def ft_gray_gaussian_blur(image):
     kernel_size = (5, 5)
@@ -207,10 +213,12 @@ def ft_gray_gaussian_blur(image):
     plt.subplot(2, 6, 4), plt.imshow(GB_image, cmap='gray')
     plt.title('Gray Gaussian blur')
 
+
 def ft_gray(image):
     grayscale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     plt.subplot(2, 6, 2), plt.imshow(grayscale_image, cmap='gray')
     plt.title('Gray Image')
+
 
 def process_single_image(img_path):
     try:
@@ -224,7 +232,7 @@ def process_single_image(img_path):
         ft_gray_gaussian_blur(image)
         ft_binary_gaussian_blur(image)
         ft_hsv_mask(image)
-        ft_rgb_mask(image)  
+        ft_rgb_mask(image)
         ft_color_mask(image)
         ft_color_alpha_mask(image)
         ft_roi_objects(image)
@@ -358,6 +366,7 @@ def main():
     # filtered_image = ft_color_mask(image)
     # plt.imshow(filtered_image)
     # plt.show()
+
 
 if __name__ == "__main__":
     main()
